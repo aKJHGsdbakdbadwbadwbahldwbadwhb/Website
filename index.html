@@ -336,6 +336,7 @@
     font-size: 30pt !important;
     font-family: 'Bilbo', serif !important;
     z-index: 501 !important;
+    cursor: pointer;
 }
 .pageTitle .fields {
     position: relative !important;
@@ -458,7 +459,7 @@ body.sorrow-entered .portfolioWorks {
       </div>
     </noscript>
 
-    <div class="pageTitle" style="opacity: 0;">
+    <div class="pageTitle" style="opacity: 0;" onclick="window.open('https://t.me/Demiseannc', '_blank', 'noopener,noreferrer')">
       <span><i>demise.wtf</i></span>
       <br>
       <span class="fields"><i></i></span>
@@ -618,27 +619,34 @@ body.sorrow-entered .portfolioWorks {
         bgMusic.load();
         name.textContent = (currentTrack + 1) + '.mp3';
         progress.style.width = '0%';
-        if (auto) bgMusic.play().catch(function(){});
+        if (auto) bgMusic.play().then(setPlaying).catch(function(){ setPlaying(); });
+        else setPlaying();
     }
 
     function setPlaying() {
-        play.textContent = '▶';
+        play.textContent = bgMusic.paused ? '▶' : '❚❚';
     }
 
+    bgMusic.addEventListener('play', setPlaying);
+    bgMusic.addEventListener('pause', setPlaying);
+
     play.onclick = function() {
-        if (bgMusic.paused) bgMusic.play().catch(function(){});
-        else bgMusic.pause();
-        setPlaying();
+        if (bgMusic.paused) {
+            bgMusic.play().then(setPlaying).catch(function(){ setPlaying(); });
+        } else {
+            bgMusic.pause();
+            setPlaying();
+        }
     };
 
-    prev.onclick = function() { loadTrack(currentTrack - 1, true); setPlaying(); }; 
-    next.onclick = function() { loadTrack(currentTrack + 1, true); setPlaying(); };
+    prev.onclick = function() { loadTrack(currentTrack - 1, true); }; 
+    next.onclick = function() { loadTrack(currentTrack + 1, true); };
 
     bgMusic.ontimeupdate = function() {
         if (bgMusic.duration) progress.style.width = (bgMusic.currentTime / bgMusic.duration * 100) + '%';
     };
 
-    bgMusic.onended = function() { loadTrack(currentTrack + 1, true); setPlaying(); };
+    bgMusic.onended = function() { loadTrack(currentTrack + 1, true); };
 
     line.onclick = function(e) {
         if (!bgMusic.duration) return;
@@ -647,7 +655,7 @@ body.sorrow-entered .portfolioWorks {
     };
 
     loadTrack(0, false);
-    setTimeout(function() { bgMusic.play().then(setPlaying).catch(function(){}); }, 500);
+    setTimeout(function() { bgMusic.play().then(setPlaying).catch(function(){ setPlaying(); }); }, 500);
 
     (function() {
         var el = document.getElementById('text');
@@ -791,7 +799,7 @@ body.sorrow-entered .portfolioWorks {
         if (bgMusic) {
             bgMusic.play().then(function() {
                 var playBtn = document.getElementById('playTrack');
-                if (playBtn) playBtn.textContent = '▶';
+                if (playBtn) playBtn.textContent = '❚❚';
             }).catch(function(){});
         }
         document.body.style.overflow = '';
